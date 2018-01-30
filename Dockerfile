@@ -1,8 +1,7 @@
 FROM alpine:latest
 
-RUN mkdir /aela
-COPY . /aela
-ENTRYPOINT /bin/bash
+RUN mkdir /aela2
+COPY . /aela2
 #FROM ubuntu:14.04
 #MAINTAINER javacodegeeks
 #
