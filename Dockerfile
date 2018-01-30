@@ -1,7 +1,7 @@
 FROM alpine:latest
 
-RUN mkdir /app
-COPY . /app
+RUN mkdir /aela
+COPY . /aela
 ENTRYPOINT ["/bin/bash", "/app/run.sh"]
 CMD ["start"]
 #FROM ubuntu:14.04
