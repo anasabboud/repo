@@ -2,7 +2,7 @@ FROM alpine:latest
 
 RUN mkdir /aela
 COPY . /aela
-RUN /bin/bash
+ENTRYPOINT /bin/bash
 #FROM ubuntu:14.04
 #MAINTAINER javacodegeeks
 #
