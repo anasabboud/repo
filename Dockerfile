@@ -35,6 +35,8 @@ RUN curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/ap
 RUN  ln -s /usr/share/maven/bin/mvn /usr/bin/mvn && \
     echo "create links ---------------------------------- [OK]"
     # CLEANUP ==================================================================
+RUN apk update && \
+    ech "updating apk ----------------------------[OK]"
 RUN apk del build-dependencies unzip curl tar libstdc++ && \
     echo "unzipping ---------------------------------- [OK]" 
 RUN    rm -rf /tmp/* /var/cache/apk/*
