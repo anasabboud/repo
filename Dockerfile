@@ -20,6 +20,7 @@ ENV JAVA_VERSION_MAJOR=8 \
 
 # Install prerequisites
 RUN apk add --no-cache curl
+RUN ech ">>>> CURL works"
 
 #ENTRYPOINT ["/usr/bin/curl"]
 
