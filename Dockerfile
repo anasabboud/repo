@@ -19,24 +19,32 @@ ENV JAVA_VERSION_MAJOR=8 \
     LANG=C.UTF-8
 
 # Install prerequisites
-RUN apk add --no-cache curl
-RUN echo ">>>> CURL works"
+RUN apk add --no-cache curl && \
+    echo "install curl ---------------------------------- [OK]"
 
 #ENTRYPOINT ["/usr/bin/curl"]
 
     # MAVEN ====================================================================
 RUN    apk add --no-cache curl tar && \
+    echo "install tar ---------------------------------- [OK]" && \
     mkdir -p /usr/share/maven /usr/share/maven/ref && \
+    echo "create directory for maven ---------------------------------- [OK]" && \
     curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
+    echo "download maven ---------------------------------- [OK]" && \
     | tar -xzC /usr/share/maven --strip-components=1 && \
+    echo "unzip maven ---------------------------------- [OK]" && \
     ln -s /usr/share/maven/bin/mvn /usr/bin/mvn && \
+    echo "create links ---------------------------------- [OK]" && \
     # CLEANUP ==================================================================
     apk del build-dependencies unzip curl tar libstdc++ && \
+    echo "unzipping ---------------------------------- [OK]" && \
     rm -rf /tmp/* /var/cache/apk/*
+    echo "cleaning up ---------------------------------- [OK]"
 
 WORKDIR /data
 
-COPY settings-docker.xml /usr/share/maven/ref/
+COPY settings-docker.xml /usr/share/maven/ref/ && \
+echo "coping files ---------------------------------- [OK]" && \
 
 CMD ["mvn"]
 
