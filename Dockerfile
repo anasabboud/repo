@@ -1,67 +1,86 @@
-FROM dockette/alpine:3.4
+# AlpineLinux with a glibc-2.26-r0 and Oracle Java 8
+FROM alpine:3.6
 
-MAINTAINER Milan Sulc <sulcmil@gmail.com>
+MAINTAINER Anastas Dancha <anapsix@random.io>
+# thanks to Vladimir Krivosheev <develar@gmail.com> aka @develar for smaller image
+# and Victor Palma <palma.victor@gmail.com> aka @devx for pointing it out
 
-ENV JAVA_VERSION=8
-ENV JAVA_UPDATE=112
-ENV JAVA_BUILD=15
-ENV JAVA_HOME="/usr/lib/jvm/default-jvm"
-ENV LANG=C.UTF-8
-ENV GLIBC_VERSION=2.23-r3
+# Java Version and other ENV
+ENV JAVA_VERSION_MAJOR=8 \
+    JAVA_VERSION_MINOR=162 \
+    JAVA_VERSION_BUILD=12 \
+    JAVA_PACKAGE=server-jre \
+    JAVA_JCE=unlimited \
+    JAVA_HOME=/opt/jdk \
+    PATH=${PATH}:/opt/jdk/bin \
+    GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc \
+    GLIBC_VERSION=2.26-r0 \
+    LANG=C.UTF-8
 
-ENV MAVEN_VERSION=3.3.9
-ENV USER_HOME_DIR="/root"
-ENV MAVEN_HOME /usr/share/maven
-ENV MAVEN_CONFIG "$USER_HOME_DIR/.m2"
-
-# Based on offical @andreptb/Dockerfiles (thank you)
-# Based on offical MAVEN image (thank you)
-
-RUN apk upgrade --update && \
-    apk add --no-cache --virtual=build-dependencies libstdc++ curl ca-certificates unzip && \
-    for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION} glibc-i18n-${GLIBC_VERSION}; do curl -sSL https://github.com/andyshinn/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done && \
-    apk add --allow-untrusted /tmp/*.apk && \
+# do all in one step
+RUN set -ex 
+RUN [[ ${JAVA_VERSION_MAJOR} != 7 ]] || ( echo >&2 'Oracle no longer publishes JAVA7 packages' && exit 1 ) 
+RUN apk upgrade --update
+RUN apk add --update libstdc++ curl ca-certificates bash java-cacerts
+RUN for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION} glibc-i18n-${GLIBC_VERSION}; do curl -sSL ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done
+RUN apk add --allow-untrusted /tmp/*.apk && \
     rm -v /tmp/*.apk && \
     ( /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true ) && \
     echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
-    /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib && \
-    echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf && \
-    curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie" -o /tmp/java.tar.gz \
-        "http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION}u${JAVA_UPDATE}-b${JAVA_BUILD}/jdk-${JAVA_VERSION}u${JAVA_UPDATE}-linux-x64.tar.gz" && \
-    curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie" -o /tmp/jce_policy-${JAVA_VERSION}.zip \
-        "http://download.oracle.com/otn-pub/java/jce/${JAVA_VERSION}/jce_policy-${JAVA_VERSION}.zip" && \
+    /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib 
+RUN    mkdir /opt
+RUN    curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie" -o /tmp/java.tar.gz \
+      http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/0da788060d494f5095bf8624735fa2f1/${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz && \
+    JAVA_PACKAGE_SHA256=$(curl -sSL https://www.oracle.com/webfolder/s/digest/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}checksum.html | grep -E "${JAVA_PACKAGE}-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64\.tar\.gz" | grep -Eo '(sha256: )[^<]+' | cut -d: -f2 | xargs) && \
+    echo "${JAVA_PACKAGE_SHA256}  /tmp/java.tar.gz" > /tmp/java.tar.gz.sha256 && \
+    sha256sum -c /tmp/java.tar.gz.sha256 && \
     gunzip /tmp/java.tar.gz && \
-    tar -C /tmp -xf /tmp/java.tar && \
-    mkdir -p "/usr/lib/jvm" && \
-    mv "/tmp/jdk1.${JAVA_VERSION}.0_${JAVA_UPDATE}" "/usr/lib/jvm/java-${JAVA_VERSION}-oracle" && \
-    ln -s "java-${JAVA_VERSION}-oracle" "$JAVA_HOME" && \
-    unzip -jo -d "$JAVA_HOME/jre/lib/security" "/tmp/jce_policy-${JAVA_VERSION}.zip" && \
-    ln -s "$JAVA_HOME/bin/"* "/usr/bin/" && \
-    apk del glibc-i18n && \
-    rm -rf "$JAVA_HOME/"*src.zip \
-           "$JAVA_HOME/lib/missioncontrol" \
-           "$JAVA_HOME/lib/visualvm" \
-           "$JAVA_HOME/jre/bin/javaws" \
-           "$JAVA_HOME/jre/lib/javaws.jar" \
-           "$JAVA_HOME/jre/lib/desktop" \
-           "$JAVA_HOME/jre/plugin" \
-           "$JAVA_HOME/jre/lib/"deploy* \
-           "$JAVA_HOME/jre/bin/jjs" \
-           "$JAVA_HOME/jre/bin/keytool" \
-           "$JAVA_HOME/jre/bin/orbd" \
-           "$JAVA_HOME/jre/bin/pack200" \
-           "$JAVA_HOME/jre/bin/policytool" \
-           "$JAVA_HOME/jre/bin/rmid" \
-           "$JAVA_HOME/jre/bin/rmiregistry" \
-           "$JAVA_HOME/jre/bin/servertool" \
-           "$JAVA_HOME/jre/bin/tnameserv" \
-           "$JAVA_HOME/jre/bin/unpack200" \
-           "$JAVA_HOME/jre/lib/ext/nashorn.jar" \
-           "$JAVA_HOME/jre/lib/jfr.jar" \
-           "$JAVA_HOME/jre/lib/jfr" \
-           "$JAVA_HOME/jre/lib/oblique-fonts" && \
+RUN    tar -C /opt -xf /tmp/java.tar
+    ln -s /opt/jdk1.${JAVA_VERSION_MAJOR}.0_${JAVA_VERSION_MINOR} /opt/jdk && \
+    find /opt/jdk/ -maxdepth 1 -mindepth 1 | grep -v jre | xargs rm -rf && \
+    cd /opt/jdk/ && ln -s ./jre/bin ./bin && \
+    if [ "${JAVA_JCE}" == "unlimited" ]; then echo "Installing Unlimited JCE policy" && \
+      curl -jksSLH "Cookie: oraclelicense=accept-securebackup-cookie" -o /tmp/jce_policy-${JAVA_VERSION_MAJOR}.zip \
+        http://download.oracle.com/otn-pub/java/jce/${JAVA_VERSION_MAJOR}/jce_policy-${JAVA_VERSION_MAJOR}.zip && \
+      cd /tmp && unzip /tmp/jce_policy-${JAVA_VERSION_MAJOR}.zip && \
+      cp -v /tmp/UnlimitedJCEPolicyJDK8/*.jar /opt/jdk/jre/lib/security/; \
+    fi && \
+    sed -i s/#networkaddress.cache.ttl=-1/networkaddress.cache.ttl=10/ $JAVA_HOME/jre/lib/security/java.security && \
+    apk del curl glibc-i18n && \
+    rm -rf /opt/jdk/jre/plugin \
+           /opt/jdk/jre/bin/javaws \
+           /opt/jdk/jre/bin/jjs \
+           /opt/jdk/jre/bin/orbd \
+           /opt/jdk/jre/bin/pack200 \
+           /opt/jdk/jre/bin/policytool \
+           /opt/jdk/jre/bin/rmid \
+           /opt/jdk/jre/bin/rmiregistry \
+           /opt/jdk/jre/bin/servertool \
+           /opt/jdk/jre/bin/tnameserv \
+           /opt/jdk/jre/bin/unpack200 \
+           /opt/jdk/jre/lib/javaws.jar \
+           /opt/jdk/jre/lib/deploy* \
+           /opt/jdk/jre/lib/desktop \
+           /opt/jdk/jre/lib/*javafx* \
+           /opt/jdk/jre/lib/*jfx* \
+           /opt/jdk/jre/lib/amd64/libdecora_sse.so \
+           /opt/jdk/jre/lib/amd64/libprism_*.so \
+           /opt/jdk/jre/lib/amd64/libfxplugins.so \
+           /opt/jdk/jre/lib/amd64/libglass.so \
+           /opt/jdk/jre/lib/amd64/libgstreamer-lite.so \
+           /opt/jdk/jre/lib/amd64/libjavafx*.so \
+           /opt/jdk/jre/lib/amd64/libjfx*.so \
+           /opt/jdk/jre/lib/ext/jfxrt.jar \
+           /opt/jdk/jre/lib/ext/nashorn.jar \
+           /opt/jdk/jre/lib/oblique-fonts \
+           /opt/jdk/jre/lib/plugin.jar \
+           /tmp/* /var/cache/apk/* && \
+    ln -sf /etc/ssl/certs/java/cacerts $JAVA_HOME/jre/lib/security/cacerts && \
+    echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf
+
+# EOF
     # MAVEN ====================================================================
-    apk add --no-cache curl tar && \
+RUN    apk add --no-cache curl tar && \
     mkdir -p /usr/share/maven /usr/share/maven/ref && \
     curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
     | tar -xzC /usr/share/maven --strip-components=1 && \
