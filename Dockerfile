@@ -17,6 +17,11 @@ ENV JAVA_VERSION_MAJOR=8 \
     GLIBC_VERSION=2.26-r0 \
     LANG=C.UTF-8
 
+# Install prerequisites
+RUN apt-get update && apt-get install -y \
+curl
+CMD /bin/bash
+
     # MAVEN ====================================================================
 RUN    apk add --no-cache curl tar && \
     mkdir -p /usr/share/maven /usr/share/maven/ref && \
