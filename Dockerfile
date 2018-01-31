@@ -37,7 +37,8 @@ RUN  ln -s /usr/share/maven/bin/mvn /usr/bin/mvn && \
     # CLEANUP ==================================================================
 RUN apk update && \
     echo "updating apk ----------------------------[OK]"
-RUN apk del build-dependencies unzip curl tar libstdc++ && \
+RUN apk update && \ 
+    apk del build-dependencies unzip curl tar libstdc++ && \
     echo "unzipping ---------------------------------- [OK]" 
 RUN    rm -rf /tmp/* /var/cache/apk/*
     echo "cleaning up ---------------------------------- [OK]"
