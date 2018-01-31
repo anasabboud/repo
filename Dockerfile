@@ -15,6 +15,7 @@ ENV JAVA_VERSION_MAJOR=8 \
     PATH=${PATH}:/opt/jdk/bin \
     GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc \
     GLIBC_VERSION=2.26-r0 \
+    MAVEN_VERSION=3.5.2 \
     LANG=C.UTF-8
 
 # Install prerequisites
