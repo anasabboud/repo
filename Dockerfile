@@ -1,70 +1,18 @@
-# AlpineLinux with a glibc-2.26-r0 and Oracle Java 8
-FROM alpine:3.6
-
-MAINTAINER Anastas Dancha <anapsix@random.io>
-# thanks to Vladimir Krivosheev <develar@gmail.com> aka @develar for smaller image
-# and Victor Palma <palma.victor@gmail.com> aka @devx for pointing it out
-
-# Java Version and other ENV
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=162 \
-    JAVA_VERSION_BUILD=12 \
-    JAVA_PACKAGE=server-jre \
-    JAVA_JCE=unlimited \
-    JAVA_HOME=/opt/jdk \
-    PATH=${PATH}:/opt/jdk/bin \
-    GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc \
-    GLIBC_VERSION=2.26-r0 \
-    MAVEN_VERSION=3.5.2 \
-    LANG=C.UTF-8
-
-# Install prerequisites
-RUN apk add --no-cache curl && \
-    echo "install curl ---------------------------------- [OK]"
-
-#ENTRYPOINT ["/usr/bin/curl"]
-
-    # MAVEN ====================================================================
-RUN    apk add --no-cache curl tar && \
-    echo "install tar ---------------------------------- [OK]"
-RUN mkdir -p /usr/share/maven /usr/share/maven/ref && \
-    echo "create directory for maven ---------------------------------- [OK]" 
-RUN curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-    | tar -xzC /usr/share/maven --strip-components=1 && \
-    echo "downloading & unzipping maven ---------------------------------- [OK]" 
-RUN  ln -s /usr/share/maven/bin/mvn /usr/bin/mvn && \
-    echo "create links ---------------------------------- [OK]"
-    # CLEANUP ==================================================================
-RUN apk update && \
-    echo "updating apk ----------------------------[OK]"
-
-#RUN apk del build-dependencies unzip curl tar libstdc++
-    
-RUN    rm -rf /tmp/* /var/cache/apk/* && \
-    echo "cleaning up ---------------------------------- [OK]"
-
-WORKDIR /data
-
-COPY settings-docker.xml /usr/share/maven/ref/ 
-RUN echo "copying --------------------[OK]"
-CMD ["mvn"]
-
-#FROM alpine:latest
-#
-#RUN mkdir /aela2
-#COPY . /aela2
-
-
-#FROM ubuntu:14.04
-#MAINTAINER javacodegeeks
-#
-#RUN apt-get update && apt-get install -y python-software-properties software-properties-common
-#RUN add-apt-repository ppa:webupd8team/java
-#
-#RUN echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 boolean true" | debconf-set-selections
-#
-#RUN apt-get update && apt-get install -y oracle-java8-installer maven
-#
-#ADD . /usr/local/helloworld
-#RUN cd /usr/local/helloworld &&  mvn install
-#CMD ["java", "-cp", "/usr/local/helloworld/target/helloworld-1.0.jar", "HelloWorld"]
+FROM centos
+ENV JAVA_VERSION 8u31
+ENV BUILD_VERSION b13
+# Upgrading system
+RUN yum -y upgrade
+RUN yum -y install wget
+# Downloading & Config Java 8
+RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
+RUN yum -y install /tmp/jdk-8-linux-x64.rpm
+RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
+RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
+RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
+EXPOSE 8080
+#install Spring Boot artifact
+VOLUME /tmp
+ADD /terg/helloworld-1.0.jar helloworld-1.0.jar
+RUN sh -c 'touch /helloworld-1.0.jar'
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
