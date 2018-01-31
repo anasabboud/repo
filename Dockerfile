@@ -14,8 +14,8 @@ RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
 RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
 
-ENV JAVA_HOME /usr/bin/java
-ENV PATH /usr/bin/java/bin
+ENV JAVA_HOME /usr/bin/jdk-8u161
+ENV PATH /usr/bin/jdk-8u161/bin
 
 EXPOSE 8080
 
