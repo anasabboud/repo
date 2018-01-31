@@ -22,5 +22,6 @@ EXPOSE 8080
 #install Spring Boot artifact
 VOLUME /tmp
 ADD /terg/helloworld-1.0.jar helloworld-1.0.jar
+CMD ["/bin/sh"]
 #RUN sh -c 'touch /helloworld-1.0.jar'
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
