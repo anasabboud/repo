@@ -30,9 +30,8 @@ RUN    apk add --no-cache curl tar && \
     mkdir -p /usr/share/maven /usr/share/maven/ref && \
     echo "create directory for maven ---------------------------------- [OK]" && \
     curl -fsSL http://apache.osuosl.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz \
-    echo "download maven ---------------------------------- [OK]" && \
     | tar -xzC /usr/share/maven --strip-components=1 && \
-    echo "unzip maven ---------------------------------- [OK]" && \
+    echo "downloading & unzipping maven ---------------------------------- [OK]" && \
     ln -s /usr/share/maven/bin/mvn /usr/bin/mvn && \
     echo "create links ---------------------------------- [OK]" && \
     # CLEANUP ==================================================================
