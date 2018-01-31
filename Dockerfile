@@ -45,8 +45,8 @@ RUN    rm -rf /tmp/* /var/cache/apk/*
 
 WORKDIR /data
 
-COPY settings-docker.xml /usr/share/maven/ref/ && \
-RUN echo "coping files ---------------------------------- [OK]" && \
+COPY settings-docker.xml /usr/share/maven/ref/ 
+RUN echo "coping files ---------------------------------- [OK]"
 
 CMD ["mvn"]
 
