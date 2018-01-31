@@ -1,8 +1,7 @@
 FROM centos
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13
-ENV JAVA_HOME /usr/bin/java
-ENV PATH /usr/bin/java/bin
+
 # Upgrading system
 RUN yum -y upgrade
 RUN yum -y install wget
@@ -14,6 +13,10 @@ RUN tar xzf jdk-8u161-linux-x64.tar.gz
 RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
 RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
+
+ENV JAVA_HOME /usr/bin/java
+ENV PATH /usr/bin/java/bin
+
 EXPOSE 8080
 
 #install Spring Boot artifact
