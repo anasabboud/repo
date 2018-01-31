@@ -14,13 +14,13 @@ RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
 RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 200000
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
 
-ENV JAVA_HOME /usr/bin/jdk-8u161
-ENV PATH /usr/bin/jdk-8u161/bin
+#ENV JAVA_HOME /usr/bin/jdk-8u161
+#ENV PATH /usr/bin/jdk-8u161/bin
 
-EXPOSE 8080
+#EXPOSE 8080
 
 #install Spring Boot artifact
-VOLUME /tmp
-ADD /terg/helloworld-1.0.jar helloworld-1.0.jar
+#VOLUME /tmp
+#ADD /terg/helloworld-1.0.jar helloworld-1.0.jar
 #RUN sh -c 'touch /helloworld-1.0.jar'
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
+#ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
