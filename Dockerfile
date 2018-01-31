@@ -1,6 +1,8 @@
 FROM centos
 ENV JAVA_VERSION 8u31
 ENV BUILD_VERSION b13
+ENV JAVA_HOME /usr/bin/java
+ENV PATH /usr/bin/java/bin
 # Upgrading system
 RUN yum -y upgrade
 RUN yum -y install wget
