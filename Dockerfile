@@ -40,13 +40,13 @@ RUN apk update && \
 
 #RUN apk del build-dependencies unzip curl tar libstdc++
     
-RUN    rm -rf /tmp/* /var/cache/apk/*
+RUN    rm -rf /tmp/* /var/cache/apk/* && \
     echo "cleaning up ---------------------------------- [OK]"
 
 WORKDIR /data
 
 COPY settings-docker.xml /usr/share/maven/ref/ 
-
+RUN echo "copying --------------------[OK]"
 CMD ["mvn"]
 
 #FROM alpine:latest
