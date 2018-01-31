@@ -18,9 +18,9 @@ ENV JAVA_VERSION_MAJOR=8 \
     LANG=C.UTF-8
 
 # Install prerequisites
-RUN apt-get update && apt-get install -y \
-curl
-CMD /bin/bash
+RUN apk add --no-cache curl
+
+#ENTRYPOINT ["/usr/bin/curl"]
 
     # MAVEN ====================================================================
 RUN    apk add --no-cache curl tar && \
