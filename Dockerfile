@@ -25,4 +25,4 @@ ADD /terg/helloworld-1.0.jar helloworld-1.0.jar
 #RUN sh -c 'touch /helloworld-1.0.jar'
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
 CMD ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/helloworld-1.0.jar"]
-CMD ["/bin/sh"]
+RUN /bin/sh
