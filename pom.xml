@@ -11,4 +11,24 @@
 			<version>5.0.3.BUILD-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+	<build>
+	<plugins>
+	<plugin>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-maven-plugin</artifactId>
+		<version>1.2.5.RELEASE</version>
+		<executions>
+			<execution>
+				<goals>
+					<goal>repackage</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+	</plugins>
+	</build>
 </project>
